@@ -1,171 +1,182 @@
-# Exoplanet Detection Using Machine Learning
+# 🪐 Exoplanet Detection using Machine Learning
 
 ![Python](https://img.shields.io/badge/Python-3.x-blue.svg)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Supervised-orange.svg)
 ![Scikit-Learn](https://img.shields.io/badge/scikit--learn-ML-orange.svg)
-![Status](https://img.shields.io/badge/Status-Academic%20Project-success.svg)
+![Model](https://img.shields.io/badge/Model-Random%20Forest-green.svg)
+![Domain](https://img.shields.io/badge/Domain-Astroinformatics-purple.svg)
+![Status](https://img.shields.io/badge/Status-Completed-success.svg)
 ![Dataset](https://img.shields.io/badge/Dataset-Kaggle-blueviolet.svg)
-![License](https://img.shields.io/badge/License-MIT-lightgrey.svg)
+![Course](https://img.shields.io/badge/Course-CYT180-blueviolet.svg)
+
+This project implements a **machine learning–based exoplanet detection system** using stellar light curve data collected by the **Kepler Space Telescope**.  
+
+The objective is to identify the presence of exoplanets from **high-dimensional, highly imbalanced time-series data** while following correct and reproducible ML practices.
 
 ---
 
-## Overview
+## 📌 Project Overview
 
-This project demonstrates an end-to-end machine learning pipeline for detecting the presence of exoplanets using stellar light curve (flux) data. The primary goal of this project is to showcase data preprocessing, dimensionality reduction, class imbalance handling, and model comparison techniques in a constrained real-world scenario where only a single labeled dataset is available.
+Detecting exoplanets is a challenging machine learning problem due to:
 
-Rather than claiming production-level performance, this project focuses on **methodology, correctness, and interpretability**.
+- Extremely **high-dimensional time-series data**
+- Severe **class imbalance** (very few confirmed exoplanets)
+- Subtle brightness variations that can be hidden by noise
+- Risk of overfitting when data is limited
+
+This project focuses on building a **clean, end-to-end ML pipeline** that emphasizes **methodology, correctness, and transparency**, rather than inflated performance claims.
 
 ---
 
-## Dataset
+## 📂 Dataset
 
-**Source:** Kaggle  
-**Link:** https://www.kaggle.com/datasets/keplersmachines/kepler-labelled-time-series-data
+- **Source:** Kaggle  
+- **Dataset:** Kepler Labelled Time Series Data  
+- **Link:** https://www.kaggle.com/datasets/keplersmachines/kepler-labelled-time-series-data
 
 ### Dataset Description
-- The dataset contains time-series flux values recorded from the Kepler Space Telescope.
-- Each row represents observations of a star over time.
-- The target column `LABEL` indicates:
+
+- Each row represents flux measurements of a star over time
+- Columns correspond to brightness values at different timestamps
+- Target column `LABEL`:
   - `0` → No exoplanet detected
   - `1` → Exoplanet detected
-- The dataset is **extremely imbalanced**, with very few confirmed exoplanet samples.
+- The dataset is **extremely imbalanced**, with very few positive samples
 
-Due to dataset access limitations, only a single labeled dataset is used in this project.
-
----
-
-## Project Approach
-
-Because only one labeled dataset is available, an **internal stratified train–test split** is used.  
-The focus is on building a **clean, reproducible, and technically correct ML pipeline**, not on inflating performance metrics.
+Due to dataset access constraints, a **single labeled dataset** is used in this project.
 
 ---
 
-## Libraries and Tools Used
+## 🔁 Workflow
 
-- **Python**
-- **NumPy & Pandas** – numerical computation and data handling
-- **Scikit-learn** – preprocessing, PCA, model training, and evaluation
-- **SciPy** – Gaussian filtering for noise reduction
-- **Matplotlib & Seaborn** – visualization
-- **Pickle** – model persistence
+### **Stage 1 — Data Preparation and Preprocessing**
 
----
+1. **Dataset Loading & Cleaning**
+   - Load the dataset using Pandas
+   - Handle missing values to ensure numerical stability
+   - Convert labels into binary format for classification
 
-## Step-by-Step Methodology
+2. **Train–Test Split**
+   - Perform an **internal stratified split (80/20)**
+   - Ensures minority class representation in both sets
+   - Fixed random state for reproducibility
 
-### 1. Data Loading and Cleaning
-- The dataset is loaded using Pandas.
-- Missing values are filled with zeros to ensure numerical stability.
-- Target labels are converted to binary format for classification.
+3. **Normalization**
+   - Normalize flux values to prevent magnitude dominance
+   - Important for distance- and kernel-based models
 
----
+4. **Gaussian Smoothing**
+   - Apply Gaussian filtering to reduce high-frequency noise
+   - Smooths stellar brightness curves while preserving patterns
 
-### 2. Train–Test Split
-- An internal **stratified split** is used due to single-dataset availability.
-- Stratification ensures rare exoplanet samples appear in both sets.
-- A fixed random state ensures reproducibility.
-
----
-
-### 3. Data Preprocessing
-
-#### a. Normalization
-- Normalization ensures features are on a comparable scale.
-- Prevents magnitude dominance in distance-based learning.
-
-#### b. Gaussian Smoothing
-- A Gaussian filter is applied to reduce high-frequency noise.
-- Helps smooth flux variations while preserving meaningful patterns.
-
-#### c. Feature Scaling
-- Standardization is applied after smoothing.
-- The scaler is fit **only on training data** to prevent data leakage.
+5. **Feature Scaling**
+   - Apply standardization (zero mean, unit variance)
+   - Scaler is fit **only on training data** to prevent data leakage
 
 ---
 
-### 4. Dimensionality Reduction (PCA)
-- The dataset contains thousands of features, increasing overfitting risk.
-- **Principal Component Analysis (PCA)** reduces dimensionality.
-- The number of components is chosen to retain **90% of variance**.
-- PCA is fit on training data and applied to test data.
+### **Stage 2 — Dimensionality Reduction**
+
+6. **Principal Component Analysis (PCA)**
+   - Original data contains thousands of features
+   - PCA reduces dimensionality and mitigates overfitting
+   - Number of components selected to retain **90% variance**
+   - PCA is trained on training data and applied to test data
 
 ---
 
-### 5. Class Imbalance Handling (Without SMOTE)
-- The minority class contains very few samples.
-- Oversampling techniques such as SMOTE were intentionally avoided to prevent synthetic overfitting.
-- **Class-weighted models** are used instead to handle imbalance safely.
+### **Stage 3 — Model Training and Evaluation**
 
-This approach reflects real-world ML best practices for extremely imbalanced datasets.
+7. **Class Imbalance Handling (Without SMOTE)**
+   - Minority class contains very few samples
+   - Oversampling methods (e.g., SMOTE) were intentionally avoided
+   - **Class-weighted models** are used instead to reduce bias safely
 
----
+8. **Model Training**
+   - Two supervised models are trained and compared:
+     - Support Vector Machine (SVM)
+     - Random Forest Classifier
 
-### 6. Model Selection
-
-#### Support Vector Machine (SVM)
-- RBF kernel captures non-linear relationships.
-- Class weighting compensates for imbalance.
-- Suitable for high-dimensional data after PCA.
-
-#### Random Forest Classifier
-- Ensemble-based method combining multiple decision trees.
-- Robust to noise and non-linear patterns.
-- Uses class weighting instead of oversampling.
-
----
-
-### 7. Model Evaluation
-
-Models are evaluated using:
-- **5-fold cross-validation**
-- **Accuracy score**
-- **Precision, recall, and F1-score**
-- **Confusion matrix visualization**
-
-Cross-validation helps mitigate bias from limited data availability.
+9. **Model Evaluation**
+   - Metrics used:
+     - Accuracy
+     - Precision
+     - Recall
+     - F1-score
+   - Confusion matrix for error analysis
+   - 5-fold cross-validation to reduce evaluation bias
 
 ---
 
-### 8. Model Persistence
-- The trained Random Forest model is saved using `pickle`.
-- Enables reuse without retraining.
-- Future predictions must follow the same preprocessing pipeline:
-  
-  `normalize → gaussian_filter → scaler → PCA`
+## 🤖 Models Used
+
+### 🔹 Support Vector Machine (SVM)
+- RBF kernel to capture non-linear patterns
+- Class weighting to handle imbalance
+- Well-suited for high-dimensional PCA-transformed data
+
+### 🔹 Random Forest Classifier
+- Ensemble learning approach using multiple decision trees
+- Robust to noise and non-linear relationships
+- Performs reliably under severe class imbalance
+- Chosen as the final saved model
 
 ---
 
-## Important Notes
+## 📊 Key Results
 
-- This project is **not production-ready**.
-- Results are **indicative**, not generalizable.
-- Emphasis is placed on correct ML practices and transparency.
+- Stable classification behavior despite extreme imbalance
+- High precision for the minority (exoplanet) class
+- Reduced overfitting due to PCA and class weighting
+- Consistent results across cross-validation folds
+
+> Reported metrics are **indicative**, not production-level, due to dataset limitations.
 
 ---
 
-## Key Takeaways
+## 💾 Model Persistence
 
-- Built a complete ML pipeline under realistic data constraints
-- Avoided data leakage and synthetic oversampling
+- The trained Random Forest model is saved using `pickle`
+- Allows reuse without retraining
+- Any new input must follow the same preprocessing pipeline:
+- normalize → gaussian_filter → scaler → PCA
+
+---
+
+## 📚 References
+
+- Kaggle – Kepler Labelled Time Series Data  
+  https://www.kaggle.com/datasets/keplersmachines/kepler-labelled-time-series-data
+
+- NASA Exoplanet Exploration Program  
+  https://exoplanets.nasa.gov/
+
+---
+
+## 🚀 Key Takeaways
+
+- Built a complete ML pipeline with limited real-world data
+- Avoided data leakage and synthetic overfitting
 - Applied principled dimensionality reduction
-- Used class-weighted models for severe imbalance
-- Prioritized reproducibility and clarity
+- Used class-weighted models for extreme imbalance
+- Prioritized reproducibility and transparency
 
 ---
 
-## Future Improvements
+## 🔮 Future Improvements
 
 - Validation on an external unseen dataset
-- Time-series–specific deep learning models
-- Hyperparameter optimization
-- Domain-driven feature engineering
+- Time-series–specific deep learning models (CNN/LSTM)
+- Hyperparameter tuning
+- Domain-specific feature engineering
 
 ---
 
-## Author
+## 👤 Author
 
 **Rupesh Vanneldas**  
-Machine Learning & Cybersecurity Student
+Machine Learning & Cybersecurity Student  
+CYT180 – Fall 2025
 
 ---
 
